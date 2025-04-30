@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
    import { FormsModule } from '@angular/forms';
    import { ItemService, Item, SVConfig } from './item.service';
    import { HttpClientModule } from '@angular/common/http';
+   import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 
    @Component({
      selector: 'app-root',
@@ -25,6 +26,7 @@ import { Component, OnInit } from '@angular/core';
      };
      configStatus: string = '';
      simulationStatus: string = '';
+     isConfigValid: boolean = false; //  flag to control Start Simulation button
 
      constructor(private itemService: ItemService) {}
 
@@ -33,39 +35,62 @@ import { Component, OnInit } from '@angular/core';
          this.items = data;
        });
      }
-     startConfig() {
-      console.log('Sending config:', this.config);
-      this.configStatus = 'Verifying...';
-      this.itemService.verifyConfig(this.config).subscribe({
-        next: (response: any) => {
-          if ('message' in response) {
-            this.configStatus = response.message;
-          } else if ('errors' in response) {
-            this.configStatus = 'Errors: ' + response.errors.join(', ');
+   startConfig() {
+    console.log('Sending config:', this.config);
+    this.configStatus = 'Verifying...';
+    this.itemService.verifyConfig(this.config).subscribe({
+      next: (response: any) => {
+        if ('message' in response) {
+          this.configStatus = response.message;
+          this.isConfigValid = response.message === 'Configuration is valid';
+          if (this.isConfigValid) {
+            // Clear configStatus after 20 seconds
+            setTimeout(() => {
+              this.configStatus = '';
+            }, 10000);
           }
-        },
-        error: (err) => {
-          console.error('Verify config error:', err);
-          this.configStatus = 'Verification failed: ' + err.message;
+        } else if ('errors' in response) {
+          this.configStatus = 'Errors: ' + response.errors.join(', ');
+          this.isConfigValid = false;
         }
-      });
-    }
-     startSimulation() {
-       console.log('Starting simulation with config:', this.config);
-       this.simulationStatus = 'Starting simulation...';
-       this.itemService.startSimulation(this.config).subscribe({
-         next: (response: any) => {
-           console.log('Start simulation response:', response);
-           if ('message' in response) {
-             this.simulationStatus = response.message;
-           } else if ('error' in response) {
-             this.simulationStatus = 'Error: ' + response.error;
-           }
-         },
-         error: (err) => {
-           console.error('Start simulation error:', err);
-           this.simulationStatus = 'Simulation failed: ' + err.message;
-         }
-       });
-     }
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Verify config error:', err);
+        const errorMessage = err.error?.errors?.join(', ') || err.message;
+        this.configStatus = 'Verification failed: ' + errorMessage;
+        this.isConfigValid = false;
+      }
+    });
+  }
+  startSimulation() {
+    console.log('Starting simulation with config:', this.config);
+    this.simulationStatus = 'Starting simulation...';
+    this.itemService.startSimulation(this.config).subscribe({
+      next: (response: any) => {
+        console.log('Start simulation response:', response);
+        if ('message' in response) {
+          this.simulationStatus = response.message;
+          // Clear simulationStatus after 20 seconds
+          setTimeout(() => {
+            this.simulationStatus = '';
+          }, 20000);
+        } else if ('error' in response) {
+          this.simulationStatus = 'Error: ' + response.error;
+          // Clear simulationStatus after 20 seconds
+          setTimeout(() => {
+            this.simulationStatus = '';
+          }, 20000);
+        }
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Start simulation error:', err);
+        const errorMessage = err.error?.error || err.message;
+        this.simulationStatus = 'Simulation failed: ' + errorMessage;
+        // Clear simulationStatus after 20 seconds
+        setTimeout(() => {
+          this.simulationStatus = '';
+        }, 20000);
+      }
+    });
+  }
    }

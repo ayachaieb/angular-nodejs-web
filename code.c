@@ -5,7 +5,7 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 
-#define SOCKET_PATH "/tmp/sv_simulator"
+#define SOCKET_PATH "/tmp/app.sv_simulator"
 #define BUFFER_SIZE 1024
 
 int main() {

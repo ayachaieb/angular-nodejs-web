@@ -35,19 +35,12 @@
         </div>
         <div class="col-12">
           <button type="button" (click)="startConfig()" class="btn btn-primary">Start Config</button>
-          <button type="button" (click)="startSimulation()" class="btn btn-success ms-2" [disabled]="configStatus !== 'Configuration is valid'">Start Simulation</button>
+          <button type="button" (click)="startSimulation()" class="btn btn-success ms-2" [disabled]="!isConfigValid">Start Simulation</button>
         </div>
       </form>
-      <!-- Items List -->
-      <div class="mt-4">
-        <h2 class="h4 mb-3">Items</h2>
-        <ul class="list-group">
-          <li *ngFor="let item of items" class="list-group-item">{{ item.name }}</li>
-        </ul>
-      </div>
+    
     </div>
     <!-- Right Column: Status Alerts -->
-     
     <div class="col">
       <div *ngIf="configStatus" class="alert" [ngClass]="{'alert-success': configStatus === 'Configuration is valid', 'alert-danger': configStatus !== 'Configuration is valid'}">
         {{ configStatus }}
@@ -57,5 +50,4 @@
       </div>
     </div>
   </div>
-  <div class="row">
 </div>

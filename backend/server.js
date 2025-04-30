@@ -11,10 +11,10 @@ const items = [
   { id: 3, name: 'Item 3' }
 ];
 
-// Enable JSON parsing
+// in order to enable JSON parsing
 app.use(express.json());
 
-// CORS middleware with logging
+// CORS middleware
 app.use(cors({
   origin: 'http://localhost:4200',
   methods: ['GET', 'POST', 'OPTIONS'],
